@@ -4,14 +4,12 @@ from http import HTTPStatus
 
 from pytest_django.asserts import assertRedirects, assertFormError
 
-from pytils.translit import slugify
-
 from django.contrib.auth import get_user
 from django.urls import reverse
 
 from news.forms import BAD_WORDS, WARNING
 
-from news.models import Comment, News
+from news.models import Comment
 
 
 @pytest.mark.django_db
@@ -50,7 +48,6 @@ def test_user_cant_use_bad_words(author_client, news, form_data):
     assert Comment.objects.count() == 0
 
 
-
 def test_author_can_delete_comment(author_client, comment):
     """Автор может удалить свой комментарий."""
     url = reverse('news:delete', args=(comment.id,))
@@ -60,8 +57,11 @@ def test_author_can_delete_comment(author_client, comment):
     # assert response.status_code == HTTPStatus.OK
     assert Comment.objects.count() == 0
 
+
 def test_user_cant_delete_comment_of_another_user(admin_client, comment):
-    """Авторизованный пользователь не может удалить чужой комментарий."""
+    """Авторизованный пользователь не может удалить комментарий
+    другого пользователя.
+    """
     url = reverse('news:delete', args=(comment.id,))
     response = admin_client.delete(url)
     assert response.status_code == HTTPStatus.NOT_FOUND

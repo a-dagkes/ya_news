@@ -5,6 +5,7 @@ from http import HTTPStatus
 from pytest_django.asserts import assertRedirects
 from django.urls import reverse
 
+
 @pytest.mark.django_db
 @pytest.mark.parametrize(
     'name, args',
@@ -17,6 +18,10 @@ from django.urls import reverse
     ),
 )
 def test_pages_availability_for_anonymous_user(client, name, args):
+    """Анонимному пользователю доступны: главная страница,
+    страница отдельной новости, страницы регистрации пользователей,
+    входа в учётную запись и выхода из нее.
+    """
     url = reverse(name, args=args) if args else reverse(name)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
@@ -34,11 +39,15 @@ def test_pages_availability_for_anonymous_user(client, name, args):
     (
         ('news:edit', pytest.lazy_fixture('id_comment_for_args')),
         ('news:delete', pytest.lazy_fixture('id_comment_for_args')),
-    ), 
+    ),
 )
 def test_pages_availability_for_different_users(
     parametrized_client, name, args, expected_status
 ):
+    """Страницы удаления и редактирования комментария доступны
+    автору комментария. Авторизованному пользователю не доступны
+    страницы редактирования и удаления чужих комментариев.
+    """
     url = reverse(name, args=args)
     response = parametrized_client.get(url)
     assert response.status_code == expected_status
@@ -53,6 +62,10 @@ def test_pages_availability_for_different_users(
     ),
 )
 def test_redirects(client, name, args):
+    """Анонимному пользователю не доступны страницы редактирования
+    и удаления комментариев, при попытке доступа к ним, он перенаправляется
+    на страницу авторизации.
+    """
     login_url = reverse('users:login')
     url = reverse(name, args=args)
     expected_url = f'{login_url}?next={url}'

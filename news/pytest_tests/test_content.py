@@ -6,6 +6,7 @@ from django.urls import reverse
 
 @pytest.mark.django_db
 def test_news_count(client, homepage_news):
+    """На главной странице не более 10 новостей."""
     url = reverse('news:home')
     response = client.get(url)
     object_list = response.context['object_list']
@@ -15,6 +16,7 @@ def test_news_count(client, homepage_news):
 
 @pytest.mark.django_db
 def test_news_order(client, homepage_news):
+    """Новости отсортированы от новых к старым."""
     url = reverse('news:home')
     response = client.get(url)
     object_list = response.context['object_list']
@@ -24,14 +26,9 @@ def test_news_order(client, homepage_news):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize(
-    'name, args',
-    (
-        ('news:detail', pytest.lazy_fixture('id_comment_for_args')),
-    ),
-)
-def test_comments_order(name, args, client, news_commentpage):
-    url = reverse(name, args=args)
+def test_comments_order(id_comment_for_args, client, news_commentpage):
+    """Комментарии отсортированы от старых к новым."""
+    url = reverse('news:detail', args=id_comment_for_args)
     response = client.get(url)
     assert 'news' in response.context
     news = response.context['news']
@@ -52,6 +49,9 @@ def test_pages_contains_form(
     form_in_content,
     id_news_for_args
 ):
+    """Авторизованному пользователю доступна форма для отправки комментария.
+    Для анонимного пользователя форма недоступна.
+    """
     url = reverse('news:detail', args=id_news_for_args)
     response = parametrized_client.get(url)
     assert ('form' in response.context) is form_in_content

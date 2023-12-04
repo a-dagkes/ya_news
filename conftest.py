@@ -74,7 +74,7 @@ def news_commentpage(news, author):
 @pytest.fixture
 def form_data():
     return {
-        'title': 'Новый заголовок',
-        'text': 'Новый текст',
+        'title': 'Новый заголовок для формы',
+        'text': 'Новый текст из формы',
         'slug': 'new-slug'
     }
